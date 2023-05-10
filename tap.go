@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/netip"
 	"time"
 
 	"github.com/mdlayher/ndp"
@@ -68,7 +69,7 @@ func NewTap(idx int) (*Tap, error) {
 // Listen starts listening for RouterSolicits on this tap and sends periodic RAs
 func (t Tap) Listen() error {
 	var c *ndp.Conn
-	var ip net.IP
+	var ip netip.Addr
 	var err error
 
 	// need this hacky loop since there are occasions where the OS seems to lock the tap for about 15sec (or sometimes longer)
@@ -105,7 +106,7 @@ func (t Tap) Listen() error {
 	}
 
 	// We are a "router", lets join the MC group
-	if err := c.JoinGroup(net.IPv6linklocalallrouters); err != nil {
+	if err := c.JoinGroup(netip.IPv6LinkLocalAllRouters()); err != nil {
 		return fmt.Errorf("failed to join multicast group: %v", err)
 	}
 
